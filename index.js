@@ -13,8 +13,8 @@ app.use('/posts',postroutes)
  
 const PORT = process.env.PORT||5000;
 
-mongoose.connect(process.env.CONNECTION_URL).then(()=>app.listen(PORT,()=>{
+mongoose.connect(process.env.MONGODB_URL||process.env.CONNECTION_URL).then(()=>app.listen(PORT,()=>{
     console.log(`Server running on : ${PORT} `)
 })).catch((err)=>console.log(err.message))
  
- 
+  
