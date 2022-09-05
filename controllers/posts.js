@@ -10,10 +10,9 @@ const getposts= async (req,res)=>{
         res.status(404).json({message:err.message})
     }
 }
-
 const createPost= async (req,res)=>{
     const post = req.body;
-    const newpost= new postMessage(post);
+    const newpost= new postMessage({...post,creator:req.userId,createdAt:new Date().toISOString()});
     try{
         await newpost.save();
 
@@ -42,9 +41,21 @@ const deletePost = async(req,res)=>{
 }
 const likePost =  async (req,res)=>{
     const {id} = req.params;
+    if(!req.userId){
+        return res.json({message:"UnAuthorized"})
+    }
     if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send('No post with that id');
     const post = await postMessage.findById(id);
-    const updatedPost=await postMessage.findByIdAndUpdate(id,{likeCount:post.likeCount + 1}, {new:true})
+    const index= post.likes.findIndex((id)=>id===String(req.userId));
+    if(index===-1){
+        post.likes.push(req.userId);
+    }
+    else{
+        post.likes=post.likes.filter((id)=>id!==String(req.userId))
+
+    }
+    const updatedPost=await postMessage.findByIdAndUpdate(id,post, {new:true})
+    
     res.json(updatedPost)
 }
 
